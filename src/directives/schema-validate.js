@@ -28,6 +28,18 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', functio
         ngModel.$validators.schema = function(value) {
           var result = sfValidator.validate(getForm(), value);
           error = result.error;
+          if (result.valid && typeof form.schema.afterValidated == 'function') {
+            var afterValidationRes = form.schema.afterValidated(value, ngModel, scope.$parent.model, form.schema);
+            if (afterValidationRes) {
+              result.error = {
+                code: afterValidationRes
+              };
+              result.valid = false;
+            }
+            if (result.error) {
+              error = result.error;
+            }
+          }
           return result.valid;
         };
       } else {
