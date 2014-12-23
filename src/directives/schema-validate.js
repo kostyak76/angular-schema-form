@@ -83,8 +83,10 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', functio
       });
 
       scope.$on('schemaFormResetValidationFeedback', function() {
-        ngModel.$dirty = false;
-        ngModel.$pristine = true;
+        scope.$apply(function() {
+          ngModel.$setValidity('schema', true);
+          error = null;
+        });
       });
 
       //This works since we now we're inside a decorator and that this is the decorators scope.
