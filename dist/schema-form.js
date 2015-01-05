@@ -1391,7 +1391,7 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', functio
 
       // Listen to an event so we can validate the input on request
       scope.$on('schemaFormValidate', function() {
-
+        ngModel.$commitViewValue();
         if (ngModel.$validate) {
           ngModel.$validate();
           if (ngModel.$invalid) { // The field must be made dirty so the error message is displayed
@@ -1404,8 +1404,10 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', functio
       });
 
       scope.$on('schemaFormResetValidationFeedback', function() {
-        ngModel.$dirty = false;
-        ngModel.$pristine = true;
+        scope.$apply(function() {
+          ngModel.$setValidity('schema', true);
+          error = null;
+        });
       });
 
       //This works since we now we're inside a decorator and that this is the decorators scope.
