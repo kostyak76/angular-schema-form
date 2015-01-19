@@ -36,7 +36,7 @@ apart from JSON Form?
 
 Documentation
 -------------
-Documentation covering defaults and form types [can be found here](docs/index.md). And you can find the documentation for how you extend angular schema form with your own types [here](https://github.com/Textalk/angular-schema-form/blob/master/docs/extending.md).
+There is one section of documentation covering [defaults and form types](docs/index.md). There is another section for how you [extend angular schema form with your own types](https://github.com/Textalk/angular-schema-form/blob/master/docs/extending.md).
 
 Basic Usage
 -----------
@@ -145,12 +145,13 @@ angular.module('myModule', ['schemaForm']);
 
 Add-ons
 ------
-There is currently three add-ons, a date picker, a colorpicker and the wysiwyg html editor tinymce.
+There are a couple of add-ons, a date picker, a colorpicker and two wysiwyg editors. 
 They have their own repos and you can find them here with usage instructions:
 
   * [https://github.com/Textalk/angular-schema-form-datepicker](https://github.com/Textalk/angular-schema-form-datepicker)
   * [https://github.com/Textalk/angular-schema-form-colorpicker](https://github.com/Textalk/angular-schema-form-colorpicker)
   * [https://github.com/Textalk/angular-schema-form-tinymce](https://github.com/Textalk/angular-schema-form-tinymce)
+  * [https://github.com/webcanvas/angular-schema-form-ckeditor](https://github.com/webcanvas/angular-schema-form-ckeditor)
 
 Your can also [create your own add-ons!](docs/extending.md)
 
