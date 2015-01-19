@@ -8,5 +8,7 @@
             ng-model-options="form.ngModelOptions"
             schema-validate="form"
             name="{{form.key.slice(-1)[0]}}"></textarea>
-  <span class="help-block">{{ (hasError() && errorMessage(schemaError())) || form.description}}</span>
+  <span  ng-show="(hasError() && errorMessage(schemaError())) || form.description"
+         ng-bind-html="(hasError() && errorMessage(schemaError())) || form.description"
+         class="help-block"></span>
 </div>
