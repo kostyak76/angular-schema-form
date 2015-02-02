@@ -181,9 +181,14 @@ angular.module('schemaForm').provider('schemaFormDecorators',
                 $http.get(url, {cache: $templateCache}).then(function(res) {
                   var key = form.key ?
                             sfPathProvider.stringify(form.key).replace(/"/g, '&quot;') : '';
+                  var magicValue = '';
+                  magicValue =
+                      (angular.isDefined(form._getterSetter))
+                          ? 'form._getterSetter'
+                          : 'model' + (key[0] !== '[' ? '.' : '') + key;
                   var template = res.data.replace(
-                    /\$\$value\$\$/g,
-                    'model' + (key[0] !== '[' ? '.' : '') + key
+                      /\$\$value\$\$/g,
+                      magicValue
                   );
                   element.html(template);
                   $compile(element.contents())(scope);
@@ -1332,6 +1337,32 @@ angular.module('schemaForm')
               var n = document.createElement(attrs.sfDecorator ||
                                              snakeCase(schemaFormDecorators.defaultDecorator, '-'));
               n.setAttribute('form','schemaForm.form['+i+']');
+
+
+              //Create ng-model getter/setter in case if we have at least one accessor function defined
+              if (obj.setter || obj.getter) {
+                obj.ngModelOptions['getterSetter'] = true;
+                obj.ngModelOptions['allowInvalid'] = true;
+                obj._getterSetter = function (newVal) {
+                  //if (angular.isDefined(newVal)) {
+                  //  scope.model[obj.key[0]] = (angular.isDefined(obj.viewToModel)) ? obj.viewToModel(newVal) : newVal;
+                  //}
+                  //return (angular.isDefined(obj.modelToView)) ? obj.modelToView(scope.model[obj.key[0]]) : scope.model[obj.key[0]];
+                  if (angular.isDefined(newVal)) {
+                    if(angular.isDefined(obj.setter)){
+                      return obj.setter(newVal);
+                    } else {
+                      return scope.model[obj.key[0]] = newVal;
+                    }
+
+                  }
+                  if (angular.isDefined(obj.getter)){
+                    return obj.getter();
+                  } else {
+                    return scope.model[obj.key[0]]
+                  }
+                };
+              }
 
               // Check if there is a slot to put this in...
               if (obj.key) {
