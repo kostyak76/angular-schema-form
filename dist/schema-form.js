@@ -1339,30 +1339,27 @@ angular.module('schemaForm')
               n.setAttribute('form','schemaForm.form['+i+']');
 
 
-              //Create ng-model getter/setter in case if we have at least one accessor function defined
-              if (obj.setter || obj.getter) {
-                obj.ngModelOptions['getterSetter'] = true;
-                obj.ngModelOptions['allowInvalid'] = true;
-                obj._getterSetter = function (newVal) {
-                  //if (angular.isDefined(newVal)) {
-                  //  scope.model[obj.key[0]] = (angular.isDefined(obj.viewToModel)) ? obj.viewToModel(newVal) : newVal;
-                  //}
-                  //return (angular.isDefined(obj.modelToView)) ? obj.modelToView(scope.model[obj.key[0]]) : scope.model[obj.key[0]];
-                  if (angular.isDefined(newVal)) {
-                    if(angular.isDefined(obj.setter)){
-                      return obj.setter(newVal);
-                    } else {
-                      return scope.model[obj.key[0]] = newVal;
-                    }
+                //Create ng-model getter/setter in case if we have at least one accessor function defined
+                if (obj.setter || obj.getter) {
+                    obj.ngModelOptions['getterSetter'] = true;
+                    obj.ngModelOptions['allowInvalid'] = true; //todo: check if we really need this
 
-                  }
-                  if (angular.isDefined(obj.getter)){
-                    return obj.getter();
-                  } else {
-                    return scope.model[obj.key[0]]
-                  }
-                };
-              }
+                    obj._viewValue = null;
+
+                    obj._getterSetter = function (newVal) {
+
+                      var modelValue = sfSelect(obj.key, scope.model);
+
+                      //setter
+                        if (angular.isDefined(newVal)) {
+                            newVal = angular.isDefined(obj.setter) ? obj.setter(newVal,  modelValue) : newVal;
+                            sfSelect(obj.key, scope.model, newVal);
+                        }
+
+                        //getter
+                        return angular.isDefined(obj.getter) ? obj.getter(modelValue,  obj._viewValue) : modelValue;
+                    };
+                }
 
               // Check if there is a slot to put this in...
               if (obj.key) {
