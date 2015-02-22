@@ -111,16 +111,21 @@ angular.module('schemaForm')
                 if (obj.setter || obj.getter) {
                     obj.ngModelOptions['getterSetter'] = true;
                     obj.ngModelOptions['allowInvalid'] = true; //todo: check if we really need this
+
+                    obj._viewValue = null;
+
                     obj._getterSetter = function (newVal) {
-                        //setter
+
+                      var modelValue = sfSelect(obj.key, scope.model);
+
+                      //setter
                         if (angular.isDefined(newVal)) {
-                            newVal = angular.isDefined(obj.setter) ? obj.setter(newVal) : newVal;
+                            newVal = angular.isDefined(obj.setter) ? obj.setter(newVal,  modelValue) : newVal;
                             sfSelect(obj.key, scope.model, newVal);
                         }
 
                         //getter
-                        var modelValue = sfSelect(obj.key, scope.model);
-                        return angular.isDefined(obj.getter) ? obj.getter(modelValue) : modelValue;
+                        return angular.isDefined(obj.getter) ? obj.getter(modelValue,  obj._viewValue) : modelValue;
                     };
                 }
 
