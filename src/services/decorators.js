@@ -54,10 +54,35 @@ angular.module('schemaForm').provider('schemaFormDecorators',
                   var key = form.key ?
                             sfPathProvider.stringify(form.key).replace(/"/g, '&quot;') : '';
                   var magicValue = '';
+
+                  //Create ng-model getter/setter in case if we have at least one accessor function defined
+                  if (form.setter || form.getter) {
+
+                    form._viewValue = [];
+
+                    form._getterSetter = function (newVal) {
+                      var modelValue = sfSelect(form.key, scope.model);
+
+                      //setter
+                      if (angular.isDefined(newVal)) {
+                        form._viewValue = newVal;
+                        modelValue = angular.isDefined(form.setter) ? form.setter(newVal, modelValue) : newVal;
+                        sfSelect(form.key, scope.model, modelValue);
+                      }
+
+                      //getter
+                      return angular.isDefined(form.getter) ? form.getter(modelValue,  form._viewValue) : modelValue;
+                    };
+                  }
+
                   magicValue =
                       (angular.isDefined(form._getterSetter))
                           ? 'form._getterSetter'
                           : 'model' + (key[0] !== '[' ? '.' : '') + key;
+                  if(angular.isDefined(form._getterSetter)){
+                    form.ngModelOptions['getterSetter'] = true;
+                    form.ngModelOptions['allowInvalid'] = true; //todo: check if we really need this
+                  }
                   var template = res.data.replace(
                       /\$\$value\$\$/g,
                       magicValue

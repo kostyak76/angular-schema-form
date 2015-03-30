@@ -106,29 +106,6 @@ angular.module('schemaForm')
                                              snakeCase(schemaFormDecorators.defaultDecorator, '-'));
               n.setAttribute('form','schemaForm.form['+i+']');
 
-
-                //Create ng-model getter/setter in case if we have at least one accessor function defined
-                if (obj.setter || obj.getter) {
-                    obj.ngModelOptions['getterSetter'] = true;
-                    obj.ngModelOptions['allowInvalid'] = true; //todo: check if we really need this
-
-                    obj._viewValue = [];
-
-                    obj._getterSetter = function (newVal) {
-                      var modelValue = sfSelect(obj.key, scope.model);
-
-                      //setter
-                        if (angular.isDefined(newVal)) {
-                          obj._viewValue = newVal;
-                          modelValue = angular.isDefined(obj.setter) ? obj.setter(newVal, modelValue) : newVal;
-                          sfSelect(obj.key, scope.model, modelValue);
-                        }
-
-                        //getter
-                        return angular.isDefined(obj.getter) ? obj.getter(modelValue,  obj._viewValue) : modelValue;
-                    };
-                }
-
               // Check if there is a slot to put this in...
               if (obj.key) {
                 var slot = slots[sfPath.stringify(obj.key)];
