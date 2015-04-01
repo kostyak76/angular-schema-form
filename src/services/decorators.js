@@ -219,6 +219,7 @@ angular.module('schemaForm').provider('schemaFormDecorators',
                         (angular.isDefined(form._getterSetter))
                             ? 'form._getterSetter'
                             : 'model' + (key[0] !== '[' ? '.' : '') + key;
+                    var realValue = 'model' + (key[0] !== '[' ? '.' : '') + key;
                     if(angular.isDefined(form._getterSetter)){
                       form.ngModelOptions['getterSetter'] = true;
                       form.ngModelOptions['allowInvalid'] = true; //todo: check if we really need this
@@ -226,6 +227,10 @@ angular.module('schemaForm').provider('schemaFormDecorators',
                     template = template.replace(
                       /\$\$value\$\$/g,
                       magicValue
+                    );
+                    template = template.replace(
+                        /\$\$real_value\$\$/g,
+                        realValue
                     );
                   }
                   element.html(template);
