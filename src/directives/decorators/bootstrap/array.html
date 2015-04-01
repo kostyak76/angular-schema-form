@@ -2,7 +2,8 @@
      ng-model="$$value$$" ng-model-options="form.ngModelOptions">
   <h3 ng-show="form.title && form.notitle !== true">{{ form.title }}</h3>
   <ol class="list-group" ng-model="modelArray" ui-sortable="form.sortableOptions">
-    <li class="list-group-item {{form.fieldHtmlClass}}" ng-repeat="item in modelArray track by $index">
+    <li class="list-group-item {{form.fieldHtmlClass}}"
+        ng-repeat="item in modelArray track by $index">
       <button ng-hide="form.readonly"
               ng-click="deleteFromArray($index)"
               style="position: relative; z-index: 20;"
