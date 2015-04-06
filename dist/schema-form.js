@@ -1843,7 +1843,8 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSele
 
       scope.$on('schemaFormResetValidationFeedback', function() {
         scope.$apply(function() {
-          ngModel.$setValidity('schema', true);
+          var errorKey = 'tv4-' + error.code;
+          ngModel.$setValidity(errorKey, true);
           error = null;
         });
       });
