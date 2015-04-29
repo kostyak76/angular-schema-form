@@ -330,6 +330,7 @@ angular.module('schemaForm').provider('schemaFormDecorators',
 
                       form._getterSetter = function (newVal) {
                         var modelValue = sfSelect(form.key, scope.model);
+                        if (!modelValue) modelValue = sfSelect(form.key, scope.model, []);//FIXME: init model value by proper default value
 
                         //setter
                         if (angular.isDefined(newVal)) {
@@ -1843,7 +1844,8 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSele
 
       scope.$on('schemaFormResetValidationFeedback', function() {
         scope.$apply(function() {
-          ngModel.$setValidity('schema', true);
+          var errorKey = 'tv4-' + error.code;
+          ngModel.$setValidity(errorKey, true);
           error = null;
         });
       });

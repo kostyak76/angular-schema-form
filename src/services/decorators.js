@@ -202,6 +202,7 @@ angular.module('schemaForm').provider('schemaFormDecorators',
 
                       form._getterSetter = function (newVal) {
                         var modelValue = sfSelect(form.key, scope.model);
+                        if (!modelValue) modelValue = sfSelect(form.key, scope.model, []);//FIXME: init model value by proper default value
 
                         //setter
                         if (angular.isDefined(newVal)) {
