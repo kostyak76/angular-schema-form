@@ -1836,7 +1836,7 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSele
           // Angular 1.3+
           ngModel.$setDirty();
           ngModel.$commitViewValue();
-          validate(ngModel.$modelValue);
+          //validate(ngModel.$viewValue);
         } else {
           // Angular 1.2
           ngModel.$setViewValue(ngModel.$viewValue);
