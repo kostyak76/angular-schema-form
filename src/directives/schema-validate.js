@@ -88,6 +88,7 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSele
         if (ngModel.$setDirty) {
           // Angular 1.3+
           ngModel.$setDirty();
+          ngModel.$commitViewValue();
           validate(ngModel.$modelValue);
         } else {
           // Angular 1.2
@@ -97,8 +98,11 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSele
 
       scope.$on('schemaFormResetValidationFeedback', function() {
         scope.$apply(function() {
-          var errorKey = 'tv4-' + error.code;
-          ngModel.$setValidity(errorKey, true);
+          for(var errorKey in ngModel.$error){
+            if(ngModel.$error.hasOwnProperty(errorKey)){
+              ngModel.$setValidity(errorKey, true);
+            }
+          }
           error = null;
         });
       });
