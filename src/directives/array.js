@@ -1,8 +1,8 @@
 /**
  * Directive that handles the model arrays
  */
-angular.module('schemaForm').directive('sfArray', ['sfSelect', 'schemaForm', 'sfValidator', 'sfPath',
-  function(sfSelect, schemaForm, sfValidator, sfPath) {
+angular.module('schemaForm').directive('sfArray', ['sfSelect', 'schemaForm', 'sfValidator', 'sfPath', '$timeout',
+  function(sfSelect, schemaForm, sfValidator, sfPath, $timeout) {
 
     var setIndex = function(index) {
       return function(form) {
@@ -135,9 +135,14 @@ angular.module('schemaForm').directive('sfArray', ['sfSelect', 'schemaForm', 'sf
           scope.deleteFromArray = function(index) {
             list.splice(index, 1);
 
+
             // Trigger validation.
             if (scope.validateArray) {
               scope.validateArray();
+              //patch  deleting not last invalidate element
+              $timeout(function(){
+                scope.$broadcast('schemaFormValidate');
+              },0)
             }
 
             // Angular 1.2 lacks setDirty
