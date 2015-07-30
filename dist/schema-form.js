@@ -1751,6 +1751,20 @@ angular.module('schemaForm')
 ]);
 
 angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSelect', function(sfValidator, sfSelect) {
+
+  function guessDefaultValueForSchemaDefinition(schemaDefinition) {
+    if (schemaDefinition && schemaDefinition.type) {
+      switch (schemaDefinition.type) {
+        case 'string':
+          return "";
+        case 'number':
+          return "";
+        default:
+          return undefined;
+      }
+    }
+  }
+
   return {
     restrict: 'A',
     scope: false,
@@ -1839,8 +1853,21 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSele
       scope.$on('schemaFormValidate', function() {
         if (ngModel.$setDirty) {
           // Angular 1.3+
+          var isDefaultValueSet = true;
+          if (!ngModel.$dirty && ngModel.$viewValue === undefined) {
+            var defaultValue = guessDefaultValueForSchemaDefinition(getForm().schema);
+            if (defaultValue !== undefined) {
+              ngModel.$setViewValue(defaultValue);
+              ngModel.$commitViewValue();
+              isDefaultValueSet = true;
+            }
+          }
           ngModel.$setDirty();
           ngModel.$$parseAndValidate();
+          if (isDefaultValueSet) {
+            ngModel.$setViewValue(defaultValue);
+            ngModel.$commitViewValue();
+          }
           //validate(ngModel.$viewValue);
         } else {
           // Angular 1.2
