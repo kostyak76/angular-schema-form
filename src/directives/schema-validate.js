@@ -101,7 +101,7 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSele
       scope.$on('schemaFormValidate', function() {
         if (ngModel.$setDirty) {
           // Angular 1.3+
-          var isDefaultValueSet = true;
+          var isDefaultValueSet = false;
           if (!ngModel.$dirty && ngModel.$viewValue === undefined) {
             var defaultValue = guessDefaultValueForSchemaDefinition(getForm().schema);
             if (defaultValue !== undefined) {
