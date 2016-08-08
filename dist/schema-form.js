@@ -51,6 +51,81 @@ angular.module('schemaForm').provider('sfPath',
   };
 }]);
 
+/**
+ * @ngdoc service
+ * @name sfSelect
+ * @kind function
+ *
+ */
+angular.module('schemaForm').factory('sfSelect', ['sfPath', function(sfPath) {
+  var numRe = /^\d+$/;
+
+  /**
+    * @description
+    * Utility method to access deep properties without
+    * throwing errors when things are not defined.
+    * Can also set a value in a deep structure, creating objects when missing
+    * ex.
+    * var foo = Select('address.contact.name',obj)
+    * Select('address.contact.name',obj,'Leeroy')
+    *
+    * @param {string} projection A dot path to the property you want to get/set
+    * @param {object} obj   (optional) The object to project on, defaults to 'this'
+    * @param {Any}    valueToSet (opional)  The value to set, if parts of the path of
+    *                 the projection is missing empty objects will be created.
+    * @returns {Any|undefined} returns the value at the end of the projection path
+    *                          or undefined if there is none.
+    */
+  return function(projection, obj, valueToSet) {
+    if (!obj) {
+      obj = this;
+    }
+    //Support [] array syntax
+    var parts = typeof projection === 'string' ? sfPath.parse(projection) : projection;
+
+    if (typeof valueToSet !== 'undefined' && parts.length === 1) {
+      //special case, just setting one variable
+      obj[parts[0]] = valueToSet;
+      return obj;
+    }
+
+    if (typeof valueToSet !== 'undefined' &&
+        typeof obj[parts[0]] === 'undefined') {
+       // We need to look ahead to check if array is appropriate
+      obj[parts[0]] = parts.length > 2 && numRe.test(parts[1]) ? [] : {};
+    }
+
+    var value = obj[parts[0]];
+    for (var i = 1; i < parts.length; i++) {
+      // Special case: We allow JSON Form syntax for arrays using empty brackets
+      // These will of course not work here so we exit if they are found.
+      if (parts[i] === '') {
+        return undefined;
+      }
+      if (typeof valueToSet !== 'undefined') {
+        if (i === parts.length - 1) {
+          //last step. Let's set the value
+          value[parts[i]] = valueToSet;
+          return valueToSet;
+        } else {
+          // Make sure to create new objects on the way if they are not there.
+          // We need to look ahead to check if array is appropriate
+          var tmp = value[parts[i]];
+          if (typeof tmp === 'undefined' || tmp === null) {
+            tmp = numRe.test(parts[i + 1]) ? [] : {};
+            value[parts[i]] = tmp;
+          }
+          value = tmp;
+        }
+      } else if (value) {
+        //Just get nex value.
+        value = value[parts[i]];
+      }
+    }
+    return value;
+  };
+}]);
+
 angular.module('schemaForm').provider('schemaFormDecorators',
 ['$compileProvider', 'sfPathProvider', function($compileProvider, sfPathProvider) {
   var defaultDecorator = '';
@@ -1089,81 +1164,6 @@ angular.module('schemaForm').provider('schemaForm',
 
 }]);
 
-/**
- * @ngdoc service
- * @name sfSelect
- * @kind function
- *
- */
-angular.module('schemaForm').factory('sfSelect', ['sfPath', function(sfPath) {
-  var numRe = /^\d+$/;
-
-  /**
-    * @description
-    * Utility method to access deep properties without
-    * throwing errors when things are not defined.
-    * Can also set a value in a deep structure, creating objects when missing
-    * ex.
-    * var foo = Select('address.contact.name',obj)
-    * Select('address.contact.name',obj,'Leeroy')
-    *
-    * @param {string} projection A dot path to the property you want to get/set
-    * @param {object} obj   (optional) The object to project on, defaults to 'this'
-    * @param {Any}    valueToSet (opional)  The value to set, if parts of the path of
-    *                 the projection is missing empty objects will be created.
-    * @returns {Any|undefined} returns the value at the end of the projection path
-    *                          or undefined if there is none.
-    */
-  return function(projection, obj, valueToSet) {
-    if (!obj) {
-      obj = this;
-    }
-    //Support [] array syntax
-    var parts = typeof projection === 'string' ? sfPath.parse(projection) : projection;
-
-    if (typeof valueToSet !== 'undefined' && parts.length === 1) {
-      //special case, just setting one variable
-      obj[parts[0]] = valueToSet;
-      return obj;
-    }
-
-    if (typeof valueToSet !== 'undefined' &&
-        typeof obj[parts[0]] === 'undefined') {
-       // We need to look ahead to check if array is appropriate
-      obj[parts[0]] = parts.length > 2 && numRe.test(parts[1]) ? [] : {};
-    }
-
-    var value = obj[parts[0]];
-    for (var i = 1; i < parts.length; i++) {
-      // Special case: We allow JSON Form syntax for arrays using empty brackets
-      // These will of course not work here so we exit if they are found.
-      if (parts[i] === '') {
-        return undefined;
-      }
-      if (typeof valueToSet !== 'undefined') {
-        if (i === parts.length - 1) {
-          //last step. Let's set the value
-          value[parts[i]] = valueToSet;
-          return valueToSet;
-        } else {
-          // Make sure to create new objects on the way if they are not there.
-          // We need to look ahead to check if array is appropriate
-          var tmp = value[parts[i]];
-          if (typeof tmp === 'undefined' || tmp === null) {
-            tmp = numRe.test(parts[i + 1]) ? [] : {};
-            value[parts[i]] = tmp;
-          }
-          value = tmp;
-        }
-      } else if (value) {
-        //Just get nex value.
-        value = value[parts[i]];
-      }
-    }
-    return value;
-  };
-}]);
-
 /*  Common code for validating a value against its form and schema definition */
 /* global tv4 */
 angular.module('schemaForm').factory('sfValidator', [function() {
@@ -1752,19 +1752,6 @@ angular.module('schemaForm')
 
 angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSelect', function(sfValidator, sfSelect) {
 
-  function guessDefaultValueForSchemaDefinition(schemaDefinition) {
-    if (schemaDefinition && schemaDefinition.type) {
-      switch (schemaDefinition.type) {
-        case 'string':
-          return "";
-        case 'number':
-          return "";
-        default:
-          return undefined;
-      }
-    }
-  }
-
   return {
     restrict: 'A',
     scope: false,
@@ -1851,28 +1838,28 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSele
 
       // Listen to an event so we can validate the input on request
       scope.$on('schemaFormValidate', function() {
-        if (ngModel.$setDirty) {
-          // Angular 1.3+
-          var isDefaultValueSet = false;
-          if (!ngModel.$dirty && ngModel.$viewValue === undefined) {
-            var defaultValue = guessDefaultValueForSchemaDefinition(getForm().schema);
-            if (defaultValue !== undefined) {
-              ngModel.$setViewValue(defaultValue);
-              ngModel.$commitViewValue();
-              isDefaultValueSet = true;
-            }
-          }
-          ngModel.$setDirty();
-          ngModel.$$parseAndValidate();
-          if (isDefaultValueSet) {
-            ngModel.$setViewValue(defaultValue);
+        // We set the viewValue to trigger parsers,
+          // since modelValue might be empty and validating just that
+          // might change an existing error to a "required" error message.
+          if (ngModel.$setDirty) {
+
+            // Angular 1.3+
+            ngModel.$setDirty();
+            ngModel.$setViewValue(ngModel.$viewValue);
             ngModel.$commitViewValue();
+
+            // In Angular 1.3 setting undefined as a viewValue does not trigger parsers
+            // so we need to do a special required check. Fortunately we have $isEmpty
+            if (form.required && ngModel.$isEmpty(ngModel.$modelValue)) {
+              ngModel.$setValidity('tv4-302', false);
+            }
+
+          } else {
+            // Angular 1.2
+            // In angular 1.2 setting a viewValue of undefined will trigger the parser.
+            // hence required works.
+            ngModel.$setViewValue(ngModel.$viewValue);
           }
-          //validate(ngModel.$viewValue);
-        } else {
-          // Angular 1.2
-          ngModel.$setViewValue(ngModel.$viewValue);
-        }
       });
 
       scope.$on('schemaFormResetValidationFeedback', function() {
