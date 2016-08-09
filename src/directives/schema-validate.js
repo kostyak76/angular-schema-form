@@ -99,7 +99,7 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSele
             // In Angular 1.3 setting undefined as a viewValue does not trigger parsers
             // so we need to do a special required check. Fortunately we have $isEmpty
             if (form.required && ngModel.$isEmpty(ngModel.$modelValue)) {
-              ngModel.$setValidity('tv4-302', false);
+              ngModel.$setValidity('302', false);
             }
 
           } else {
