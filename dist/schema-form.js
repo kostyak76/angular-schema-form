@@ -1798,7 +1798,7 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSele
         // Since we might have different tv4 errors we must clear all
         // errors that start with tv4-
         Object.keys(ngModel.$error)
-              .filter(function(k) { return k.indexOf('tv4-') === 0; })
+              //.filter(function(k) { return k.indexOf('tv4-') === 0; })
               .forEach(function(k) { ngModel.$setValidity(k, true); });
 
         if (!result.valid) {
@@ -1836,6 +1836,21 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSele
       // We don't use $validators since we like to set different errors depeding tv4 error codes
       ngModel.$parsers.push(validate);
 
+      //is require validate
+      // In Angular 1.3 setting undefined as a viewValue does not trigger parsers
+      var isRequireValidate = function(viewValue) {
+        var form = getForm();
+        if (!form) {
+          return viewValue;
+        }
+        if (form.required && ngModel.$isEmpty(ngModel.$modelValue)) {
+            ngModel.$setValidity('302', false);
+          } else {
+            ngModel.$setValidity('302', true);
+          }
+      };
+      ngModel.$parsers.push(isRequireValidate);
+
       // Listen to an event so we can validate the input on request
       scope.$on('schemaFormValidate', function() {
         // We set the viewValue to trigger parsers,
@@ -1847,12 +1862,6 @@ angular.module('schemaForm').directive('schemaValidate', ['sfValidator', 'sfSele
             ngModel.$setDirty();
             ngModel.$setViewValue(ngModel.$viewValue);
             ngModel.$commitViewValue();
-
-            // In Angular 1.3 setting undefined as a viewValue does not trigger parsers
-            // so we need to do a special required check. Fortunately we have $isEmpty
-            if (form.required && ngModel.$isEmpty(ngModel.$modelValue)) {
-              ngModel.$setValidity('302', false);
-            }
 
           } else {
             // Angular 1.2
